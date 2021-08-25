@@ -6,8 +6,8 @@ import style from "../Styles/style";
 
 const SignUpSchema = yup.object({
     name: yup.string().required('Required'),
-    email:  yup.string().email('Invalid email').required('Required'),
-    password: yup.string().required('Required').min(8, (min) => 'Password must be 8 characters.')  .matches(/[a-zA-Z]/, 'Password can only contain Latin letters.'),
+    phone:  yup.string().required('Required'),
+    password: yup.string().required('Required').min(8, (min) => 'Password must be 8 characters.'),
     confirmPassword:  yup.string()
     .when("password", {
         is: val => (val && val.length > 0 ? true : false),
@@ -21,17 +21,51 @@ const SignUpSchema = yup.object({
 
 });
 
-const SignUpScreen = () => {
+const SignUpScreen = ({navigation}) => {
+
+  const clickHandler = () => {
+    navigation.navigate('LoginScreen');
+  }
+
+
   return (
-    <View style={{ width: "100%", height: "100%", marginTop: 100 }}>
-      <Text>SignUp Form</Text>
+    <View style={{ width: "100%", height: "100%", marginTop: 70 }}>
+      <Text>Registration Form</Text>
       <Formik
         style={style.formContainer}
         validationSchema={SignUpSchema}
-        initialValues={{ email: "", password: "" }}
-        onSubmit={(values, actions) => {
+        initialValues={{name: "",phone: "", password: "" , confirmPassword:""}}
+        onSubmit={async (values, actions) => {
+          
             console.log(values)
+            try {
+              var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            var raw = JSON.stringify({
+              "name" : values.name,
+              "phone":values.phone,
+              "password": values.password,
+              "confirmPassword": values.confirmPassword
+            });
+
+            console.log(raw);
+            
+            let respn = await fetch('http://192.168.68.107:4000/api/user/signup', {
+              method: 'post',
+              mode: 'no-cors',
+              headers: myHeaders,
+              body: raw
+            });
+            let response = await respn.json()
+            console.log(response);
             actions.resetForm()
+            }
+           catch(err) {
+            console.log(err)
+          } 
+            actions.resetForm()
+
         }
 
            }
@@ -49,13 +83,13 @@ const SignUpScreen = () => {
 
             <TextInput
               style={style.input}
-              onChangeText={props.handleChange("email")}
-              placeholder="example@gmail.com"
-              onBlur={props.handleBlur("email")}
-              value={props.values.email}
+              onChangeText={props.handleChange("phone")}
+              placeholder="01*********"
+              onBlur={props.handleBlur("phone")}
+              value={props.values.phone}
             />
 
-            <Text style={style.errorText}>{props.touched.email && props.errors.email}</Text>
+            <Text style={style.errorText}>{props.touched.phone && props.errors.phone}</Text>
 
             <TextInput
               style={style.input}
@@ -80,6 +114,10 @@ const SignUpScreen = () => {
           </View>
         )}
       </Formik>
+      <View>
+        <Text>Already Have an Account?</Text>
+        <Button title='Login Here' onPress={clickHandler}/>
+      </View>
     </View>
   );
 };

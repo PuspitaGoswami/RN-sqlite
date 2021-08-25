@@ -1,18 +1,27 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, View , TouchableWithoutFeedback, Keyboard} from 'react-native';
 import LoginScreen from './Screens/LoginScreen';
 import SignUpScreen from './Screens/SignUpScreen';
+import Navigator from './Navigations/NavigationScreen';
+import SplashScreen from './Screens/SplashScreen';
 
 export default function App() {
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-   
-   <SignUpScreen/>
+  const [isLoading, setIsLoading] = useState(true);
 
-</View>
-    </TouchableWithoutFeedback>
+  useEffect(()=>{
+    setTimeout(() =>{
+      setIsLoading(false);
+    }, 3000)
+  });
+  if(isLoading){
+    return(
+      <SplashScreen/>
+     
+    );
+  }
+  return (
+   <Navigator/>
   
   );
 }
