@@ -60,11 +60,13 @@ const SignUpScreen = ({navigation}) => {
             let response = await respn.json()
             console.log(response);
             actions.resetForm()
+            alert('Registration Successful');
             }
            catch(err) {
             console.log(err)
           } 
             actions.resetForm()
+          
 
         }
 

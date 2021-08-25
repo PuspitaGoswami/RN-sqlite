@@ -10,6 +10,7 @@ import {
 import { Formik } from "formik";
 import * as yup from "yup";
 import style from "../Styles/style";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import HomeScreen from "./HomeScreen";
 
 const LoginSchema = yup.object({
@@ -31,6 +32,7 @@ const LoginScreen = ({ navigation }) => {
   const LoginHandler = () => {
     navigation.navigate("HomeScreen");
   };
+
 
   return (
     <View style={{ width: "100%", height: "100%", marginTop: 80 }}>
@@ -62,10 +64,14 @@ const LoginScreen = ({ navigation }) => {
               }
             );
             let response = await respn.json();
-            console.log(response);
+            await AsyncStorage.setItem('userToken', response.token);
+            const userToken =  await AsyncStorage.getItem('userToken');
+            console.log(userToken);
+
+            
             actions.resetForm();
             if (
-              response.status === 'success'
+              response.status === 'success' && userToken!== ''
             ) {
               {
                 LoginHandler();
