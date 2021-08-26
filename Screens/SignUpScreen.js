@@ -1,5 +1,5 @@
 import React from "react";
-import { TextInput, StyleSheet, View, Button, Text , TouchableWithoutFeedback} from "react-native";
+import { TextInput, StyleSheet, View, Button, Text, TouchableWithoutFeedback } from "react-native";
 import { Formik } from "formik";
 import * as yup from 'yup';
 import style from "../Styles/style";
@@ -8,42 +8,37 @@ import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabase(
   {
-    name:'UsersDB',
-    location:'default'
+    name: 'UsersDB',
+    location: 'default'
   },
-  ()=>{},
-  error=>{console.log("error")}
+  () => { },
+  error => { console.log("error") }
 );
 
 const SignUpSchema = yup.object({
-    name: yup.string().required('Required'),
-    phone:  yup.string().required('Required'),
-    password: yup.string().required('Required').min(1, (min) => 'Password must be 8 characters.'),
-    confirmPassword:  yup.string()
+  name: yup.string().required('Required'),
+  phone: yup.string().required('Required'),
+  password: yup.string().required('Required').min(1, (min) => 'Password must be 8 characters.'),
+  confirmPassword: yup.string()
     .when("password", {
-        is: val => (val && val.length > 0 ? true : false),
-        then: yup.string().oneOf(
-          [yup.ref("password")],
-          "Both password need to be the same"
-        ),
-      })
+      is: val => (val && val.length > 0 ? true : false),
+      then: yup.string().oneOf(
+        [yup.ref("password")],
+        "Both password need to be the same"
+      ),
+    })
     .required('Required')
-
-
 });
 
-const SignUpScreen = ({navigation}) => {
+const SignUpScreen = ({ navigation }) => {
 
-
-  const createTable=()=>{
-    console.log('created');
-    db.transaction((tx) =>{
+  const createTable = () => {
+    db.transaction((tx) => {
       tx.executeSql(
         "CREATE TABLE IF NOT EXISTS "
-        +"Users"
-        +"(ID INTEGER PRIMARY KEY AUTOINCREMENT,Name TEXT, PhoneNo INTEGER);"
+        + "Users"
+        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,Name TEXT, PhoneNo INTEGER);"
       )
-
     })
   }
 
@@ -58,23 +53,23 @@ const SignUpScreen = ({navigation}) => {
       <Formik
         style={style.formContainer}
         validationSchema={SignUpSchema}
-        initialValues={{name: "",phone: "", password: "" , confirmPassword:""}}
+        initialValues={{ name: "", phone: "", password: "", confirmPassword: "" }}
         onSubmit={async (values, actions) => {
-          
-            console.log(values)
-            try {
-              var myHeaders = new Headers();
+
+          console.log(values)
+          try {
+            var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
 
             var raw = JSON.stringify({
-              "name" : values.name,
-              "phone":values.phone,
+              "name": values.name,
+              "phone": values.phone,
               "password": values.password,
               "confirmPassword": values.confirmPassword
             });
 
-            console.log(raw);
-            
+            //console.log(raw);
+
             let respn = await fetch('http://192.168.68.112:4000/api/user/signup', {
               method: 'post',
               mode: 'no-cors',
@@ -82,29 +77,26 @@ const SignUpScreen = ({navigation}) => {
               body: raw
             });
             let response = await respn.json()
-            console.log(response);
-            const name= response.name;
+            // console.log(response);
+            const name = response.name;
             const phone = response.phone;
 
-            await db.transaction( async(tx)=>{
+            await db.transaction(async (tx) => {
               await tx.executeSql(
                 "INSERT INTO Users (Name, PhoneNo) VALUES(?,?)",
-                           [name,phone])
+                [name, phone])
             })
 
             actions.resetForm()
             alert('Registration Successful');
 
-            }
-           catch(err) {
+          }
+          catch (err) {
             console.log(err)
-          } 
-            actions.resetForm()
-          
-
+          }
+          actions.resetForm()
         }
-
-           }
+        }
       >
         {(props) => (
           <View>
@@ -115,7 +107,7 @@ const SignUpScreen = ({navigation}) => {
               onBlur={props.handleBlur("name")}
               value={props.values.name}
             />
-        <Text style={style.errorText}>{props.touched.name && props.errors.name}</Text>
+            <Text style={style.errorText}>{props.touched.name && props.errors.name}</Text>
 
             <TextInput
               style={style.input}
@@ -144,7 +136,7 @@ const SignUpScreen = ({navigation}) => {
               value={props.values.confirmPassword}
             />
 
-<Text style={style.errorText}>{props.touched.confirmPassword && props.errors.confirmPassword}</Text>
+            <Text style={style.errorText}>{props.touched.confirmPassword && props.errors.confirmPassword}</Text>
 
             <Button onPress={props.handleSubmit} title="Submit" />
           </View>
@@ -152,12 +144,10 @@ const SignUpScreen = ({navigation}) => {
       </Formik>
       <View>
         <Text>Already Have an Account?</Text>
-        <Button title='Login Here' onPress={clickHandler}/>
+        <Button title='Login Here' onPress={clickHandler} />
       </View>
     </View>
   );
 };
-
-
 
 export default SignUpScreen;

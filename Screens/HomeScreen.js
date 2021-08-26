@@ -1,61 +1,62 @@
-import React, {useState} from 'react';
-import { StyleSheet, Text, View,Button } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from 'expo-sqlite';
+import style from "../Styles/style";
 
-const db = SQLite.openDatabase(
-    {
-      name:'UsersDB',
-      location:'default'
-    },
-    ()=>{},
-    error=>{console.log(error)}
-  );
-  
+// const db = SQLite.openDatabase(
+//     {
+//         name: 'UsersDB',
+//         location: 'default'
+//     },
+//     () => { console.log("success")},
+//     error => { console.log(error) }
+// );
 
-const HomeScreen = ({navigation}) => {
+const db = SQLite.openDatabase('db.testDb')
+db.transaction(tx => {
+    tx.executeSql(
+      'CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY AUTOINCREMENT,Name TEXT, PhoneNo TEXT)'
+    )
+  })
 
-const [name,setName] = useState('');
-const [phone, setPhone] = useState('');
 
-    db.transaction((tx)=>{
-        tx.executeSql(
-            "SELECT Name, PhoneNo FROM Users",null,
-            (tx,result)=>{
-                var len = result.rows.length;
-                console.log('length: '+ len);
-                if(len> 0){
-                    console.log( result.rows.item(0).Name);
-                    var userName = result.rows.item(0).Name;
-                    var phone = result.rows.item(0).PhoneNo;
-                    setName(userName);
-                    setPhone(phone);
+const HomeScreen = ({ navigation }) => {
+
+    const viewData = () => {
+        console.log("view data");
+        db.transaction((tx) => {
+            tx.executeSql(
+                "SELECT Name, PhoneNo FROM Users", null,
+                (tx, result) => {
+                    var len = result.rows.length;
+                    console.log('length: ' + len);
+                    if (len > 0) {
+                        console.log(result.rows.item(0).Name);
+                        console.log(result.rows.item(0).PhoneNo);
+                    }
                 }
-            }
-        )
-    })
+            )
+        })
+        console.log("view data end");
+    }
 
-    console.log(name);
+    const insertData = () => {
+        db.transaction(tx => {
+            tx.executeSql('INSERT INTO Users (Name, PhoneNo) values (?, ?)', ['gibberish', '01111'])
+        })
+    }
 
-    const logOutHandler = async () => {
-        await AsyncStorage.removeItem('userToken');
+    return (
+        <View>
+            <Text>HomeScreen</Text>
+            {/* <Text>{name}</Text>
+            <Text>{phone}</Text> */}
 
-        navigation.navigate('LoginScreen');
-        //console.log(await AsyncStorage.getItem('userToken'));
-      }
-return (
-    <View>
-    <Text>HomeScreen</Text>
-    <Text>{name}</Text>
-    <Text>{phone}</Text>
-
-    <Button title='LogOut' onPress={logOutHandler}/>
-</View>
-);
+            <Button style ={style.submit_button} title='View Data' onPress={viewData} />
+            <Button style ={style.submit_button} title='insert data' onPress={insertData} />
+        </View>
+    );
 };
-
-const styles = StyleSheet.create({
-
-});
 
 export default HomeScreen;

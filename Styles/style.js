@@ -15,6 +15,14 @@ const style = StyleSheet.create({
       borderColor: "#ccc",
       marginVertical: 5,
     },
+
+    submit_button: {
+      height: 40,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: "#ccc",
+      marginTop: 50,
+    },
   
     errorText: {
         color: 'crimson',
