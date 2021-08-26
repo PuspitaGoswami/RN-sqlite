@@ -6,6 +6,7 @@ import SignUpScreen from './Screens/SignUpScreen';
 import Navigator from './Navigations/NavigationScreen';
 import SplashScreen from './Screens/SplashScreen';
 
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 

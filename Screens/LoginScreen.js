@@ -13,12 +13,14 @@ import style from "../Styles/style";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import HomeScreen from "./HomeScreen";
 
+
 const LoginSchema = yup.object({
   phone: yup.string().required("Required"),
   password: yup.string().required("Required"),
 });
 
 const LoginScreen = ({ navigation }) => {
+
 
   const [isSucces,setIsSucces] = useState(true);
 
@@ -52,10 +54,8 @@ const LoginScreen = ({ navigation }) => {
               password: values.password,
             });
 
-            console.log(raw);
-
             let respn = await fetch(
-              "http://192.168.68.107:4000/api/user/login",
+              "http://192.168.68.112:4000/api/user/login",
               {
                 method: "post",
                 mode: "no-cors",
@@ -66,13 +66,13 @@ const LoginScreen = ({ navigation }) => {
             let response = await respn.json();
             await AsyncStorage.setItem('userToken', response.token);
             const userToken =  await AsyncStorage.getItem('userToken');
-            console.log(userToken);
-
+            // console.log(response);
             
             actions.resetForm();
             if (
               response.status === 'success' && userToken!== ''
             ) {
+             
               {
                 LoginHandler();
               }
@@ -85,7 +85,7 @@ const LoginScreen = ({ navigation }) => {
             console.log(err);
             alert('Invalid phone number/Password');
           }
-          console.log(values);
+          console.log("form values: "+values);
           actions.resetForm();
         
         }}

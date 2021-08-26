@@ -3,11 +3,22 @@ import { TextInput, StyleSheet, View, Button, Text , TouchableWithoutFeedback} f
 import { Formik } from "formik";
 import * as yup from 'yup';
 import style from "../Styles/style";
+import * as SQLite from 'expo-sqlite';
+
+
+const db = SQLite.openDatabase(
+  {
+    name:'UsersDB',
+    location:'default'
+  },
+  ()=>{},
+  error=>{console.log("error")}
+);
 
 const SignUpSchema = yup.object({
     name: yup.string().required('Required'),
     phone:  yup.string().required('Required'),
-    password: yup.string().required('Required').min(8, (min) => 'Password must be 8 characters.'),
+    password: yup.string().required('Required').min(1, (min) => 'Password must be 8 characters.'),
     confirmPassword:  yup.string()
     .when("password", {
         is: val => (val && val.length > 0 ? true : false),
@@ -22,6 +33,19 @@ const SignUpSchema = yup.object({
 });
 
 const SignUpScreen = ({navigation}) => {
+
+
+  const createTable=()=>{
+    console.log('created');
+    db.transaction((tx) =>{
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS "
+        +"Users"
+        +"(ID INTEGER PRIMARY KEY AUTOINCREMENT,Name TEXT, PhoneNo INTEGER);"
+      )
+
+    })
+  }
 
   const clickHandler = () => {
     navigation.navigate('LoginScreen');
@@ -51,7 +75,7 @@ const SignUpScreen = ({navigation}) => {
 
             console.log(raw);
             
-            let respn = await fetch('http://192.168.68.107:4000/api/user/signup', {
+            let respn = await fetch('http://192.168.68.112:4000/api/user/signup', {
               method: 'post',
               mode: 'no-cors',
               headers: myHeaders,
@@ -59,8 +83,18 @@ const SignUpScreen = ({navigation}) => {
             });
             let response = await respn.json()
             console.log(response);
+            const name= response.name;
+            const phone = response.phone;
+
+            await db.transaction( async(tx)=>{
+              await tx.executeSql(
+                "INSERT INTO Users (Name, PhoneNo) VALUES(?,?)",
+                           [name,phone])
+            })
+
             actions.resetForm()
             alert('Registration Successful');
+
             }
            catch(err) {
             console.log(err)
